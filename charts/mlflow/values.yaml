@@ -4,7 +4,7 @@
 
 MLFlow:
   artifacts:
-    bucketName:
+    bucketName: rook-ceph-rgw-my-store.rook-ceph.svc/mlflow-d7ddbc49-1d71-4826-a93f-0d3993a8ac8d
 
 replicaCount: 1
 
@@ -20,13 +20,17 @@ fullnameOverride: ""
 
 services:
   postgres:
-    enabled: true
+    enabled: false
     externalURI:
   minio:
-    enabled: true
+    enabled: false
     externalURI:
+s3:
+  url: rook-ceph-rgw-my-store.rook-ceph.svc/mlflow-d7ddbc49-1d71-4826-a93f-0d3993a8ac8d
+  secret: mlflow-bucket
 
 postgresql:
+  enabled: true
   auth:
     postgresPassword: leftfoot1
     username: mlflow
@@ -34,12 +38,13 @@ postgresql:
     database: mlflow
 
 minio:
+  enabled: false
   auth:
     rootPassword: leftfoot1
 
 
 oauth2Proxy:
-  enabled: true
+  enabled: false
   repository: "bitnami/oauth2-proxy"
   tag: "7.4.0"
 
@@ -78,7 +83,7 @@ oauth2Proxy:
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: true
+  create:  true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -103,13 +108,14 @@ service:
   port: 5000
 
 ingress:
-  enabled: false
+  enabled: true
   className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    acme.cert-manager.io/http01-edit-in-place: "true"
   hosts:
-    - host: chart-example.local
+    - host: mlflow.coffea.casa
       paths:
         - path: /
           pathType: ImplementationSpecific
